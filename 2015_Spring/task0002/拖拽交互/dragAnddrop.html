@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>拖动</title>
+</head>
+<style>
+    body{
+    	background-color: #ccc;
+    }
+	.container {
+		width: 200px;
+		height: 800px;
+		background-color: #fff;
+		border: 1px solid #000;
+		margin: 50px;
+		float: left;
+	}
+	.box {
+		width: 200px;
+		height: 80px;
+		background-color: #f00;
+		border: 1px solid #000;
+	}
+	.light {
+		background-color: #f9f;
+	}
+	.move {
+		background-color: #ffff73;
+	}
+	.moving{
+		position: absolute;
+		background-color: #ffff73;
+	}
+	.hide {
+		display: none;
+	}
+</style>
+<body>
+<div class="wrap">
+	<div class="container">
+		<div class="box">1</div>
+		<div class="box">2</div>
+		<div class="box">3</div>
+		<div class="box">4</div>
+	</div><!--container结束-->
+	<div class="container">
+		<div class="box">5</div>
+		<div class="box">6</div>
+		<div class="box">7</div>
+	</div><!--container结束-->
+</div><!--wrap结束-->
+	<script type="text/javascript" src="util.js"></script>
+	<script type="text/javascript" src="dragAnddrop.js"></script>
+</body>
+</html>
