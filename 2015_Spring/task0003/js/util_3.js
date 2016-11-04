@@ -123,6 +123,13 @@ function removeClass(ele,oldClass){
         ele.className=arr.join(" ");
     }
 }
+function toggleClass(ele,className){
+    if (hasClass(ele,className)) {
+        removeClass(ele,className);
+    }else{
+        addClass(ele,className)
+    }
+}
 //把一个类数组转换成数组
 function toArray(obj){
     if (obj.nodeType == 1 ) {
@@ -212,7 +219,7 @@ function delegateEventClass(selector,classname,eventName,listener){
         var e = arguments[0] || window.event,
         target = e.srcElement ? e.srcElement : e.target;
         if(hasClass(target,classname)){
-            listener();
+            listener(e,target);
         }
     });
 }

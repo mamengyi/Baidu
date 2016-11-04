@@ -52,6 +52,7 @@ i {
 a {
 	text-decoration: none;
 	color: #000;
+	cursor: pointer;
 }
 body,
 h2,
@@ -112,16 +113,39 @@ nav {
 .kind-list {
 	padding-left: 5px;
 }
-.kind-list > li {
-	margin: 10px 0;
-	padding-left: 30px;
-	background: url(image/file.png) no-repeat left center;
-}
-.kind-list >li.active {
-	color: #DEFF19;
-}
+
 .kind-list .active {
 	background-color: #DEFF19;
+}
+
+
+.kind-list i {
+	margin-right: 10px;
+	width: 16px;
+	height: 16px;
+	display: inline-block;
+	background: url(image/file.png) no-repeat center bottom;
+}
+
+
+.kind-list a {
+	display: inline-block;
+	padding: 4px 0;
+	width: 100%;
+}
+.kind-list a:hover:after {
+	content:url(image/delete.png);
+	margin-right: 10px;
+	margin-top: 3px;
+	float: right;
+	color: #FFF;
+}
+.sub-kind {
+	margin-left: 10px;
+}
+.sub-kind a {
+	text-indent: 20px;
+	background: url(image/text.png) no-repeat left center;
 }
 /*nav task*/
 .task {
