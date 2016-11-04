@@ -1,0 +1,168 @@
+/**公用样式**/
+ul,
+ol,
+dl,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+input,
+select,
+textarea,
+form {
+	margin: 0;
+	padding: 0;
+}
+img {
+	border: none; 
+	vertical-align: top;
+}
+ul,
+ol {
+	list-style: none;
+}
+input,
+select,
+textarea {
+	outline: none;
+	border: none;
+	background-color: transparent;
+}
+textarea {
+	resize: none;
+}
+em,
+i {
+	font-style: normal;
+}
+.clearfix:after {
+	content: "."; 
+	display: block; 
+	height: 0; 
+	visibility: hidden; 
+	clear: both; 
+}
+.clearfix { 
+	*zoom: 1; 
+}
+a {
+	text-decoration: none;
+	color: #000;
+}
+body,
+h2,
+h1 {
+	font: 14px "Miscrosoft YaHei";
+}
+body {
+	padding: 10px;
+	background-color: #B0B0B0;
+}
+
+/*header*/
+header {
+	padding-left: 10px;
+	height: 60px;
+	line-height: 60px;
+	font-size: 20px;
+	border: 1px solid #CCC;
+	color: #999;
+	background-color: #DDD;
+}
+
+/*nav-box*/
+.nav-box {
+	float: left;
+	width: 230px;
+	border: 1px solid #CCC;
+}
+nav {
+	box-sizing: border-box;
+	height: 530px;
+}
+.new-kind,
+.new-task {
+	padding-left: 16px;
+	height: 40px;
+	line-height: 40px;
+	border-top: 1px solid #CCC;
+	background-color: #EEE;
+}
+.new-kind a,
+.new-task a {
+	padding: 3px 0 3px 28px;
+	background: url(image/add.png) no-repeat;
+}
+
+/*nav kind*/
+.kind {
+	padding: 20px 10px;
+	background-color: #F2F2F2;
+}
+.kind nav {
+	background-color: #F2F2F2;
+}
+.kind p {
+	margin: 20px 0;
+}
+.kind-list {
+	padding-left: 5px;
+}
+.kind-list > li {
+	margin: 10px 0;
+	padding-left: 30px;
+	background: url(image/file.png) no-repeat left center;
+}
+.kind-list >li.active {
+	color: #DEFF19;
+}
+.kind-list .active {
+	background-color: #DEFF19;
+}
+/*nav task*/
+.task {
+	background-color: #FFF;
+}
+.task-title {
+	padding-left: 10px;
+	height: 40px;
+	line-height: 40px;
+	border-bottom: 1px solid #CCC;
+	background-color: #EEE;
+}
+.task-title a {
+	padding: 5px 10px;
+	border: 1px solid transparent;
+}
+.task-title a:hover {
+	border-color: #CCC;
+	background-color: #FFF;
+}
+
+/*edit*/
+.edit {
+	overflow: hidden;
+	text-indent: 10px;
+}
+.edit-title,
+.edit-date {
+	height: 52px;
+	line-height: 52px;
+	border-bottom: 1px solid #CCC;
+	background-color: #FAFAEE;
+}
+.edit-title {
+	background-color: #F2F2F2;
+	font-size: 18px;
+	font-weight: 700;
+}
+.edit-content {
+	box-sizing: border-box;
+	height: 467px;
+	padding: 10px;
+	background-color: #FFF;
+}
