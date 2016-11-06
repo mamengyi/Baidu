@@ -460,3 +460,40 @@ function supportDrag(){ 
     var div = document.createElement('div'); 
     return ('draggable' in div) || ('ondragstart' in div && 'ondrop' in div); 
 }
+
+//在升序的数组中插入新的一项,返回新数组。
+function orderInsert(arr,item){
+    if (!arr[0]) {
+        arr.push(item);
+    }else if (item<arr[0]) {
+        arr.unshift(item);
+        return arr;
+    }else if(item>arr[arr.length-1]){
+        arr.push(item);
+        return arr;
+    }else{
+        var i=Math.floor(arr.length/2);
+        while(i){
+            if (item<arr[i]) {
+                if (item>arr[i-1]) {
+                    return insertItem(arr,i,item);
+                }else{
+                    i=Math.floor(i/2);
+                }
+            }else{
+                if (item<arr[i+1]) {
+                    return insertItem(arr,i,item);
+                }else{
+                    i=i+Math.floor(i/2);
+                }
+            }
+        }
+    }
+}
+
+//在数组的i位置插入一项
+function insertItem(arr,i,item){
+    var result=arr.slice(0,i);
+    result.push(item);
+    return result.concat(arr.slice(i));
+}

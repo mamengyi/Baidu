@@ -126,6 +126,12 @@ nav {
 	display: inline-block;
 	background: url(image/file.png) no-repeat center bottom;
 }
+.kind-list .hide i {
+	background: url(image/file-hide.png) no-repeat center bottom;
+}
+.hide .sub-kind {
+	display: none;
+}
 
 
 .kind-list a {
@@ -189,4 +195,38 @@ nav {
 	height: 467px;
 	padding: 10px;
 	background-color: #FFF;
+}
+
+/*task-box*/
+.task-box {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	padding: 30px;
+	width: 600px;
+	height: 400px;
+	margin-top: -200px;
+	margin-left: -300px;
+	border: 3px solid #F79C9C;
+	background-color: #FFF7D6;
+}
+.task-box input,
+.task-box textarea {
+	margin: 10px;
+	display: inline-block;
+	width: 100%;
+	border: 1px solid #000;
+}
+.task-box input {
+	height: 30px;
+	line-height: 30px;
+}
+.task-box textarea {
+	height: 150px;
+}
+.task-box button {
+	padding: 5px 10px;
+	border: 1px solid #000; 
+	background-color: #FFF7D6;
+	margin: 10px;
 }
