@@ -2,42 +2,66 @@ console.log("gtd");
 //管理分类的对象
 
 var kind=function(){
-	var activeItem,
+	var activeItem=$(".default a"),
 		taskBox,
 		getStorage=function(){
-			var lStore=localStorage,
-				kinds=JSON.parse(lStore.getItem("kindIndex")),
+			var kinds=getStore("kindIndex"),
 				arr=[],
 				value;
 			switch(arguments.length){
 				case 0:
-					for (var i = 0, len = kinds.length; i < len; i++) {
-						value=JSON.parse(lStore.getItem(kinds[i]));
-						if (value[1]) {
-							var subArr=[kinds[i],value[0].length];
-							for (var key in value[1]){
-								subArr.push(key,value[1][key].length);
+					if (!getStore("默认分类")) {
+						setStore("默认分类",{length:0});
+					}
+					if (kinds) {
+						for (var i = 0, len = kinds.length; i < len; i++) {
+							value=getStore(kinds[i]);
+							if (value[1]) {
+								var subArr=[kinds[i],value[0].length||0];
+								for (var key in value[1]){
+									subArr.push(key,value[1][key].length);
+								}
+								arr.push(subArr);
+							}else{
+								arr.push(kinds[i],value[0].length);
 							}
-							arr.push(subArr);
+						}
+						renderKind(arr);
+						renderTask();
+					}
+					break;
+					
+				case 1:
+					if (getStore(arguments[0])) {
+						if (arguments[0]==="默认分类") {
+							return getStore(arguments[0]).taskData;
 						}else{
-							arr.push(kinds[i],value[0].length);
+							if (getStore(arguments[0])[0]) {
+								return getStore(arguments[0])[0].taskData;
+							}
 						}
 					}
-					renderKind(arr);
 					break;
-				case 1:
-					return JSON.parse(lStore.getItem(arguments[0])).taskData||
-						   JSON.parse(lStore.getItem(arguments[0]))[0].taskData;
 				case 2:
-					return JSON.parse(lStore.getItem(arguments[0]))[1][arguments[1]].taskData;
+					return getStore(arguments[0])[1][arguments[1]].taskData;
 			}
-			
+		},
+		getTaskData=function(){
+			if (!activeItem.name) {
+				if (activeItem.getAttribute("subname")) {
+					return getStorage(activeItem.parentNode.parentNode.previousSibling.name,activeItem.getAttribute("subname"));
+				}else{
+					return getStorage("默认分类");
+				}
+			}else{
+				return getStorage(activeItem.name);
+			}
 		},
 		renderKind=function(arr){
-			var kindList=document.createElement("ul"),
-				defaultNum=JSON.parse(localStorage.getItem("默认分类")).length,
+			var kindList=$(".kind-list"),
+				defaultNum=getStore("默认分类").length,
 				sum=defaultNum;
-				kinds='<li class="default"><a href="#" class="active"><i></i>默认分类<span>('+defaultNum+')</span></a></li>';
+			kinds='<li class="default"><a href="#" class="active"><i></i>默认分类<span>('+defaultNum+')</span></a></li>';
 			for(var i=0,len=arr.length;i<len;i++){
 				if (isArray(arr[i])) {
 					var subKind='',
@@ -52,53 +76,62 @@ var kind=function(){
 				}
 				sum+=num;
 			}
-			$(".sum").innerHTML=sum;
+			$(".sum").innerHTML="("+sum+")";
 			kindList.innerHTML=kinds;
-			addClass(kindList,"kind-list");
 			$(".kind").appendChild(kindList);
 			activeItem= $(".default a");
-		}
+		},
 		renderTask=function(){
-			var taskList=createTaskList(),
-				content="",
-				taskData;
-			if (!activeItem.name) {
-				if (activeItem.getAttribute("subname")) {
-					taskData=getStorage(activeItem.parentNode.parentNode.previousSibling.name,activeItem.getAttribute("subname"));
-				}else{
-					taskData=getStorage("默认分类");
-				}
-			}else{
-				taskData=getStorage(activeItem.name);
-			}
-			if (taskData) {
-				for (var i = 0; i < taskData["orderData"].length; i++) {
-					var item=taskData["orderData"][i];
-					content+="<dt>"+item+"</dt>";
-					for(var j=0;j<taskData[item].length;j++){
-						if (taskData[item][j].finish) {
-							content+='<dd class="finish">'+taskData[item][j].title+'</dd>';
-						}else{
-							content+="<dd>"+taskData[item][j].title+"</dd>";
+			var taskList=$(".task-list");
+			if (activeItem) {
+				var	content="",
+					taskData=getTaskData();
+				if (taskData) {
+					for (var i = 0; i < taskData["orderData"].length; i++) {
+						var item=taskData["orderData"][i];
+						content+="<dt>"+item+"</dt>";
+						for(var j=0;j<taskData[item].length;j++){
+							if (taskData[item][j].finish) {
+								content+='<dd><a class="finish" index="'+j+'">'+taskData[item][j].title+'</a></dd>';
+							}else{
+								content+='<dd><a index="'+j+'">'+taskData[item][j].title+'</a></dd>';
+							}
 						}
 					}
-				}
-			}
-			taskList.innerHTML=content;
-		},
-		createTaskList=function(){
-			var taskList;
-			return function(){
-				if (taskList) {
-					return taskList;
+					$(".edit-title").innerHTML=taskData[taskData["orderData"][0]][0].title;
+					$(".edit-date time").innerHTML=taskData["orderData"][0];
+					$(".edit-content").innerHTML=taskData[taskData["orderData"][0]][0].content;
 				}else{
-					taskList=document.createElement("dl");
-					addClass(taskList,"task-list");
-					$(".task").appendChild(taskList);
-					return taskList;
+					$(".edit-title").innerHTML="";
+					$(".edit-date time").innerHTML="";
+					$(".edit-content").innerHTML="";
 				}
+				taskList.innerHTML=content;
+			}else{
+				if(taskList){
+					taskList.innerHTML="";}
+				$(".edit-title").innerHTML="";
+				$(".edit-date time").innerHTML="";
+				$(".edit-content").innerHTML="";
 			}
-		}(),
+			
+		},
+		showTask=function(e,target){
+			var getdate=function(node){
+				if (node.previousSibling.tagName==="dt"||node.previousSibling.tagName.toLowerCase()==="dt") {
+					return node.previousSibling.innerHTML;
+				}else{
+					return getdate(node.previousSibling);
+				}
+			},
+			    taskData=getTaskData(),
+				date=getdate(target.parentNode),
+				title=target.innerHTML;
+				content=taskData[date][target.getAttribute("index")].content;
+			$(".edit-title").innerHTML=title;
+			$(".edit-date time").innerHTML=date;
+			$(".edit-content").innerHTML=content;
+		},
 		toggleActive= function(e,target){
 	        preventDefault(e);
 	        stopPropagation(e);
@@ -109,6 +142,11 @@ var kind=function(){
 		deleteKind = function(e,target){
 			var x=e.clientX;
 			if (x>217&&x<226) {
+				var reduceNum=function(){
+					var num=arguments[0].getElementsByTagName("span")[0].innerHTML.substr(1,1),
+						sum=arguments[1].innerHTML.substr(1,1);
+					arguments[1].innerHTML="("+(sum-num)+")";
+				}
 				if (hasClass(target.parentNode,"default")) {
 					alert("不能删除默认分类");
 				}else if (confirm("确认要删除吗？")) {
@@ -118,11 +156,24 @@ var kind=function(){
 					}else{
 						activeItem=null;
 					}
+					if (target.name) { //如果是一级分类
+						localStorage.removeItem(target.name);
+						editStore("kindIndex",function(arr){
+							removeItem(arr,target.name);
+						});
+					}else if (target.getAttribute("subname")) { //如果是二级分类
+						var name=target.parentNode.parentNode.previousSibling.name;
+						editStore(name,function(arr){
+							delete arr[1][target.getAttribute("subname")];
+						});
+						reduceNum(target,target.parentNode.parentNode.previousSibling.getElementsByTagName("span")[0]);
+					}
+					reduceNum(target,$(".sum"));
 					target.parentNode.parentNode.removeChild(target.parentNode);
 					target.parentNode=null;
 				}
+				renderTask();
 			}
-			
 		},
 		removeActive = function(){
 			removeClass(activeItem,"active");
@@ -136,20 +187,34 @@ var kind=function(){
 					var li=document.createElement("li"),
 						a=document.createElement("a");
 						li.appendChild(a);
-					if (!activeItem) {
+					if (!activeItem) {  //如果是一级分类
 						addClass(li,"list-item");
 						$(".kind-list").appendChild(li);
-						var file=document.createElement("i");
-						a.appendChild(file);
-					}else if(activeItem.parentNode.getElementsByClassName("sub-kind")[0]){
+						a.innerHTML="<i></i>"+kind+"<span>(0)</span>";
+						a.name=kind;
+						setStore(kind,[{}]);
+						if (!getStore("kindIndex")) {
+							setStore("kindIndex",[]);
+						}
+						editStore("kindIndex",function(arr){
+							arr.push(kind);
+						});
+					}else{ //如果是二级分类
+						if (!activeItem.parentNode.getElementsByClassName("sub-kind")[0]) {
+							var ul=document.createElement("ul");
+							ul.className="sub-kind";
+							activeItem.parentNode.appendChild(ul);
+						}
+						a.setAttribute("subname",kind);
 						activeItem.parentNode.getElementsByClassName("sub-kind")[0].appendChild(li);
-					}else{
-						var ul=document.createElement("ul");
-						ul.className="sub-kind";
-						ul.appendChild(li);
-						activeItem.parentNode.appendChild(ul);
+						editStore(activeItem.name,function(arr){
+							if (!arr[1]) {
+								arr[1]={};
+							}
+							arr[1][kind]={length:0};
+						});
+						a.innerHTML=kind+"<span>(0)</span>"
 					}
-					a.appendChild(document.createTextNode(kind));
 					removeClass(activeItem,"active");
 					activeItem=a;
 					addClass(activeItem,"active");
@@ -178,7 +243,7 @@ var kind=function(){
 			contentLb.appendChild(document.createTextNode("任务描述："));
 			contentLb.appendChild(content);
 			submit.appendChild(document.createTextNode("确定"));
-			$.add(submit,"click",update);
+			$.add(submit,"click",updateTask);
 			cancel.appendChild(document.createTextNode("取消"));
 			$.add(cancel,"click",function(){
 				document.body.removeChild(taskBox);
@@ -199,19 +264,54 @@ var kind=function(){
 				document.body.appendChild(taskBox);
 			}
 		},
-		update=function(){
+		updateTask=function(){
 			var title=taskBox.getElementsByTagName("input")[0],
 				date=taskBox.getElementsByTagName("input")[1],
-				content=taskBox.getElementsByTagName("textarea")[0];
-			if (!activeItem.taskData) {
-				activeItem.taskData={};
-				activeItem.taskData["orderData"]=[];
+				content=taskBox.getElementsByTagName("textarea")[0],
+			    store=function(task){
+					task.length+=1;
+					if (!task.taskData) {
+						task.taskData={};
+						task.taskData["orderData"]=[];
+					}
+					if (!task.taskData[date.value]) {
+						task.taskData[date.value]=[];
+						task.taskData["orderData"]=orderInsert(task.taskData["orderData"],date.value);
+					}
+					task.taskData[date.value].push({"title":title.value,"content":content.value,"finish":false});
+				},
+				addNum=function(){
+					for (var i = 0; i < arguments.length; i++) {
+						var node=arguments[i],
+							num=node.innerHTML.substr(1,1)-0+1;
+						node.innerHTML="("+num+")";
+					}
+				};
+			if (!activeItem.name) {
+				if (activeItem.getAttribute("subname")) { //如果是二级分类
+					editStore(activeItem.parentNode.parentNode.previousSibling.name,function(arr){
+						var task=arr[1][activeItem.getAttribute("subname")];
+						store(task);
+					});
+					addNum(activeItem.parentNode.parentNode.previousSibling.getElementsByTagName("span")[0]);
+				}else{ //如果是默认分类
+					editStore("默认分类",function(arr){
+						store(arr);
+					});
+				}
+			}else{ //如果是一级分类
+				editStore(activeItem.name,function(arr){
+					if (!arr[0]) {
+						arr[0]={length:0};
+					}
+					store(arr[0]);
+				});
 			}
-			if (!activeItem.taskData[date.value]) {
-				activeItem.taskData[date.value]=[];
-				activeItem.taskData["orderData"]=orderInsert(activeItem.taskData["orderData"],date.value);
-			}
-			activeItem.taskData[date.value].push({"title":title.value,"content":content.value});
+			renderTask();
+			addNum(activeItem.getElementsByTagName("span")[0],$(".sum"));
+			$(".edit-title").innerHTML=title.value;
+			$(".edit-date time").innerHTML=date.value;
+			$(".edit-content").innerHTML=content.value;
 			title.value="";
 			date.value="";
 			content.value="";
@@ -226,103 +326,11 @@ var kind=function(){
 			$.delegateTag(".kind-list","a","click",deleteKind);
 			$.delegateTag(".kind-list","a","click",renderTask);
 			$.delegateTag(".kind-list","i","click",collapse);
+			$.delegateTag(".task-list","a","click",showTask);
 			$.click(".new-task",newTask);
 		},
 	}
 }();
-
-var defaultKind={
-	length: 2,
-	taskData: {
-		orderData: ["2016-10-01","2016-11-02"],
-		"2016-10-01": [{
-			title: "大扫除",
-			content: "人生整理魔法",
-			finish: true
-		}],
-		"2016-11-02": [{
-			title: "安装",
-			content: "安装梳妆台",
-			finish: false
-		}]
-	}
-},
-ife=[
-	{
-		length: 2,
-		taskData: {
-			orderData: ["2016-08-02","2016-09-01"],
-			"2016-09-01": [{
-				title: "review",
-				content: "看看review",
-				finish: true
-			}],
-			"2016-08-02": [{
-				title: "对比",
-				content: "看看别代码",
-				finish: false
-			}]
-		}
-	},
-	{
-		task01: {
-			length: 2,
-			taskData: {
-				orderData: ["2016-07-02","2016-07-12"],
-				"2016-07-12": [{
-					title: "两列布局",
-					content: "自适应两列布局",
-					finish: true
-				}],
-				"2016-07-02": [{
-					title: "三列布局",
-					content: "圣杯布局和双飞翼布局",
-					finish: false
-				}]
-			}
-		},
-		task02: {
-			length: 1,
-			taskData: {
-				orderData: ["2016-08-12"],
-				"2016-08-12": [{
-					title: "Ajax",
-					content: "高级程序设计Ajax部分",
-					finish: false
-				}],
-			}
-		},
-	},
-],
-life=[
-	{
-		length: 0,
-	},
-	{
-		游玩: {
-			length: 2,
-			taskData: {
-				orderData: ["2016-11-12","2016-11-19"],
-				"2016-11-12": [{
-					title: "回家",
-					content: "洗衣服，拿望远镜",
-					finish: false
-				}],
-				"2016-11-19": [{
-					title: "演唱会",
-					content: "南京",
-					finish: false
-				}]
-			}
-		},
-	},
-];
-var arr=["百度IFE","家庭生活"];
-localStorage.clear();
-localStorage.setItem("kindIndex",JSON.stringify(arr));
-localStorage.setItem("默认分类",JSON.stringify(defaultKind));
-localStorage.setItem("百度IFE",JSON.stringify(ife));
-localStorage.setItem("家庭生活",JSON.stringify(life));
 
 
 kind.init();

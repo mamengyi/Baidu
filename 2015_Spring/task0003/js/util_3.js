@@ -500,3 +500,17 @@ function insertItem(arr,i,item){
     return result.concat(arr.slice(i));
 }
 
+//从storage中获取对象
+function getStore(name){
+    return JSON.parse(localStorage.getItem(name));
+}
+//将对象保存到storage中
+function setStore(name,obj){
+    localStorage.setItem(name,JSON.stringify(obj));
+}
+//修改storage中的对象
+function editStore(name,fn){
+    var obj=getStore(name);
+    fn(obj);
+    setStore(name,obj);
+}
