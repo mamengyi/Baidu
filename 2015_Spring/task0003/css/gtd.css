@@ -168,9 +168,33 @@ nav {
 	padding: 5px 10px;
 	border: 1px solid transparent;
 }
-.task-title a:hover {
+.task-title a:hover,
+.task-title .active {
 	border-color: #CCC;
 	background-color: #FFF;
+}
+.task-list {
+	width: 190px;
+	margin: 10px;
+}
+.task-list dt {
+	font-size: 16px;
+	margin-top: 10px;
+}
+
+.task-list dd a{
+	margin-top: 10px;
+	display: inline-block;
+	padding: 2px 0 2px 20px;
+	width: 100%;
+}
+.task-list .active {
+	background-color: #63BD84;
+}
+.task-list .finish {
+	background-image: url(image/finish.png);
+	background-repeat: no-repeat;
+	background-size: 18px 18px;
 }
 
 /*edit*/
@@ -189,6 +213,20 @@ nav {
 	background-color: #F2F2F2;
 	font-size: 18px;
 	font-weight: 700;
+}
+.edit .finish-btn,
+.edit .edit-btn {
+	float: right;
+	margin-right: 22px;
+	margin-top: 12px;
+	width: 25px;
+	height: 25px;
+}
+.edit .finish-btn {
+	background: url(image/finish.png) no-repeat;
+}
+.edit .edit-btn {
+	background: url(image/edit.png) no-repeat;
 }
 .edit-content {
 	box-sizing: border-box;

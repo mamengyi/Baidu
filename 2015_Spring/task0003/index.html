@@ -21,9 +21,9 @@
 	<div class="nav-box">
 		<nav class="task">
 			<div class="task-title">
-				<a href="">所有</a>
-				<a href="">未完成</a>
-				<a href="">已完成</a>
+				<a href="#" class="all-task active">所有</a>
+				<a href="#" class="unfinish-task">未完成</a>
+				<a href="#" class="finish-task">已完成</a>
 			</div>
 			<dl class="task-list"></dl>
 		</nav>
@@ -31,8 +31,8 @@
 	</div><!--task结束-->
 	
 	<section class="edit">
-		<p class="edit-title"></p>
-		<p class="edit-date">任务日期：<time></time></p>
+		<div><p class="edit-title"></p><a href="#" class="edit-btn"></a><a href="#" class="finish-btn"></a></div>
+		<p class="edit-date">任务日期：<time class="date"></time></p>
 		<p class="edit-content"></p>
 	</section>
 <script type="text/javascript" src="js/util_3.js"></script>

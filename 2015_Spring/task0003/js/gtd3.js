@@ -3,7 +3,10 @@ console.log("gtd");
 
 var kind=function(){
 	var activeItem=$(".default a"),
-		taskBox,
+		newBox,
+		editBox,
+		activeTask,
+		filterStatus=$(".all-task");
 		getStorage=function(){
 			var kinds=getStore("kindIndex"),
 				arr=[],
@@ -46,6 +49,17 @@ var kind=function(){
 					return getStore(arguments[0])[1][arguments[1]].taskData;
 			}
 		},
+		editTaskStorage=function(defaultK,superK,subK){
+			if (!activeItem.name) {
+				if (activeItem.getAttribute("subname")) { //如果是二级分类
+					editStore(activeItem.parentNode.parentNode.previousSibling.name,subK);
+				}else{ //如果是默认分类
+					editStore("默认分类",defaultK);
+				}
+			}else{ //如果是一级分类
+				editStore(activeItem.name,superK);
+			}
+		},
 		getTaskData=function(){
 			if (!activeItem.name) {
 				if (activeItem.getAttribute("subname")) {
@@ -81,40 +95,81 @@ var kind=function(){
 			$(".kind").appendChild(kindList);
 			activeItem= $(".default a");
 		},
-		renderTask=function(){
-			var taskList=$(".task-list");
+		renderTask=function(active){
+			var taskList=$(".task-list"),
+				content="",
+				option;
+			if (hasClass(filterStatus,"finish-task")) {
+				option="finish";
+			}else if(hasClass(filterStatus,"unfinish-task")){
+				option="unfinish";
+			}
 			if (activeItem) {
-				var	content="",
-					taskData=getTaskData();
+				var	taskData=getTaskData();
 				if (taskData) {
 					for (var i = 0; i < taskData["orderData"].length; i++) {
 						var item=taskData["orderData"][i];
-						content+="<dt>"+item+"</dt>";
 						for(var j=0;j<taskData[item].length;j++){
 							if (taskData[item][j].finish) {
-								content+='<dd><a class="finish" index="'+j+'">'+taskData[item][j].title+'</a></dd>';
+								if (option==="unfinish") {
+									content+="";
+								}else{
+									if (content.indexOf('<dt>'+item+'</dt>')===-1) {
+										content+='<dt>'+item+'</dt>';
+									}
+									content+='<dd><a class="finish" index="'+j+'">'+taskData[item][j].title+'</a></dd>';
+								}
+								
 							}else{
-								content+='<dd><a index="'+j+'">'+taskData[item][j].title+'</a></dd>';
+								if (active&&active===taskData[item][j].title) {
+									content+='<dd><a index="'+j+'" class="active">'+taskData[item][j].title+'</a></dd>';
+								}else{
+									if (option==="finish") {
+										content+="";
+									}else{
+										if (content.indexOf('<dt>'+item+'</dt>')===-1) {
+											content+='<dt>'+item+'</dt>';
+										}
+										content+='<dd><a index="'+j+'">'+taskData[item][j].title+'</a></dd>';
+									}
+								}
 							}
 						}
 					}
-					$(".edit-title").innerHTML=taskData[taskData["orderData"][0]][0].title;
-					$(".edit-date time").innerHTML=taskData["orderData"][0];
-					$(".edit-content").innerHTML=taskData[taskData["orderData"][0]][0].content;
+					taskList.innerHTML=content;
+					if (content && typeof active!=="string") {
+						var date=$(".task-list dt").innerHTML,
+							title=$(".task-list dd a").innerHTML,
+							index=$(".task-list dd a").getAttribute("index");
+						$(".edit-title").innerHTML=title;
+						$(".date").innerHTML=date;
+						$(".edit-content").innerHTML=taskData[date][index].content;
+					}
+					if (!content) {
+						$(".edit-title").innerHTML="";
+						$(".date").innerHTML="";
+						$(".edit-content").innerHTML="";
+					}
 				}else{
+					taskList.innerHTML="";
 					$(".edit-title").innerHTML="";
-					$(".edit-date time").innerHTML="";
+					$(".date").innerHTML="";
 					$(".edit-content").innerHTML="";
 				}
-				taskList.innerHTML=content;
 			}else{
 				if(taskList){
-					taskList.innerHTML="";}
+					taskList.innerHTML="";
+				}
 				$(".edit-title").innerHTML="";
-				$(".edit-date time").innerHTML="";
+				$(".date").innerHTML="";
 				$(".edit-content").innerHTML="";
 			}
-			
+			if(typeof active==="string"){
+				activeTask=$(".task-list .active");
+			}else{
+				activeTask=$(".task-list a");
+				activeTask && addClass(activeTask,"active");
+			}
 		},
 		showTask=function(e,target){
 			var getdate=function(node){
@@ -129,8 +184,11 @@ var kind=function(){
 				title=target.innerHTML;
 				content=taskData[date][target.getAttribute("index")].content;
 			$(".edit-title").innerHTML=title;
-			$(".edit-date time").innerHTML=date;
+			$(".date").innerHTML=date;
 			$(".edit-content").innerHTML=content;
+			activeTask && removeClass(activeTask,"active");
+			activeTask=target;
+			addClass(activeTask,"active");
 		},
 		toggleActive= function(e,target){
 	        preventDefault(e);
@@ -178,6 +236,7 @@ var kind=function(){
 		removeActive = function(){
 			removeClass(activeItem,"active");
 			activeItem=null;
+			renderTask();
 		},
 		addKind = function(e){
 			preventDefault(e);
@@ -224,8 +283,8 @@ var kind=function(){
 		collapse = function(e,target){
 			toggleClass(target.parentNode.parentNode,"hide");
 		},
-		createTaskBox=function(){
-			taskBox=document.createElement("div");
+		createBox=function(option){
+			box=document.createElement("div");
 			var titleLb=document.createElement("label"),
 				title=document.createElement("input"),
 				dateLb=document.createElement("label"),
@@ -242,32 +301,41 @@ var kind=function(){
 			dateLb.appendChild(date);
 			contentLb.appendChild(document.createTextNode("任务描述："));
 			contentLb.appendChild(content);
-			submit.appendChild(document.createTextNode("确定"));
-			$.add(submit,"click",updateTask);
 			cancel.appendChild(document.createTextNode("取消"));
-			$.add(cancel,"click",function(){
-				document.body.removeChild(taskBox);
+			if (option==="new") {
+				submit.appendChild(document.createTextNode("添加"));
+				$.add(submit,"click",addTask);
+				$.add(cancel,"click",function(){
+				document.body.removeChild(newBox);
 			});
-			taskBox.appendChild(titleLb);
-			taskBox.appendChild(dateLb);
-			taskBox.appendChild(contentLb);
-			taskBox.appendChild(submit);
-			taskBox.appendChild(cancel);
-			addClass(taskBox,"task-box");
+			}else{
+				submit.appendChild(document.createTextNode("修改"));
+				$.add(submit,"click",reviseTask);
+				$.add(cancel,"click",function(){
+				document.body.removeChild(editBox);
+			});
+			}
+			box.appendChild(titleLb);
+			box.appendChild(dateLb);
+			box.appendChild(contentLb);
+			box.appendChild(submit);
+			box.appendChild(cancel);
+			addClass(box,"task-box");
+			return box;
 		},
 		newTask=function(e){
 			preventDefault(e);
 			if (activeItem) {
-				if (!taskBox) {
-					createTaskBox();
+				if (!newBox) {
+					newBox=createBox("new");
 				}
-				document.body.appendChild(taskBox);
+				document.body.appendChild(newBox);
 			}
 		},
-		updateTask=function(){
-			var title=taskBox.getElementsByTagName("input")[0],
-				date=taskBox.getElementsByTagName("input")[1],
-				content=taskBox.getElementsByTagName("textarea")[0],
+		addTask=function(){
+			var title=newBox.getElementsByTagName("input")[0],
+				date=newBox.getElementsByTagName("input")[1],
+				content=newBox.getElementsByTagName("textarea")[0],
 			    store=function(task){
 					task.length+=1;
 					if (!task.taskData) {
@@ -287,35 +355,122 @@ var kind=function(){
 						node.innerHTML="("+num+")";
 					}
 				};
-			if (!activeItem.name) {
-				if (activeItem.getAttribute("subname")) { //如果是二级分类
-					editStore(activeItem.parentNode.parentNode.previousSibling.name,function(arr){
-						var task=arr[1][activeItem.getAttribute("subname")];
-						store(task);
-					});
-					addNum(activeItem.parentNode.parentNode.previousSibling.getElementsByTagName("span")[0]);
-				}else{ //如果是默认分类
-					editStore("默认分类",function(arr){
-						store(arr);
-					});
+			editTaskStorage(function(arr){
+				store(arr);
+			},
+			function(arr){
+				if (!arr[0]) {
+					arr[0]={length:0};
 				}
-			}else{ //如果是一级分类
-				editStore(activeItem.name,function(arr){
-					if (!arr[0]) {
-						arr[0]={length:0};
-					}
-					store(arr[0]);
-				});
+				store(arr[0]);
+			},
+			function(arr){
+				var task=arr[1][activeItem.getAttribute("subname")];
+				store(task);
+			});
+			if (activeItem.getAttribute("subname")) { //如果是二级分类
+				addNum(activeItem.parentNode.parentNode.previousSibling.getElementsByTagName("span")[0]);
 			}
-			renderTask();
+			renderTask(title.value);
 			addNum(activeItem.getElementsByTagName("span")[0],$(".sum"));
 			$(".edit-title").innerHTML=title.value;
-			$(".edit-date time").innerHTML=date.value;
+			$(".date").innerHTML=date.value;
 			$(".edit-content").innerHTML=content.value;
 			title.value="";
 			date.value="";
 			content.value="";
-			document.body.removeChild(taskBox);
+			document.body.removeChild(newBox);
+		},
+		editTask=function(e){
+			if (activeTask) {
+				var date=$(".date").innerHTML,
+					title=$(".edit-title").innerHTML,
+					content=$(".edit-content").innerHTML;
+				preventDefault(e);
+				if (!editBox) {
+					editBox=createBox("edit");
+				}
+				editBox.getElementsByTagName("input")[0].value=title;
+				editBox.getElementsByTagName("input")[1].value=date;
+				editBox.getElementsByTagName("textarea")[0].value=content;
+				document.body.appendChild(editBox);
+			}
+		},
+		reviseTask=function(){
+			var dateBefore=$(".date").innerHTML,
+				title=editBox.getElementsByTagName("input")[0].value,
+				date=editBox.getElementsByTagName("input")[1].value,
+				content=editBox.getElementsByTagName("textarea")[0].value,
+				index=activeTask.getAttribute("index"),
+				refreshTask=function(obj){
+					obj.taskData[date][index].title=title;
+					obj.taskData[date][index].content=content;
+					obj.taskData[date][index].finish=false;
+				},
+				replaceTask=function(obj){
+					obj.taskData[dateBefore].splice(index,1);
+					if (!obj.taskData[dateBefore][0]) {
+						delete obj.taskData[dateBefore];
+						removeItem(obj.taskData.orderData,dateBefore);
+						obj.taskData.orderData=orderInsert(obj.taskData.orderData,date);
+					}
+					if (!obj.taskData[date]) {
+						obj.taskData[date]=[];
+					}
+					obj.taskData[date].push({title:title,content:content,finish:false});
+				};
+				if (dateBefore===date) {
+					editTaskStorage(
+						refreshTask,
+						function(arr){
+							refreshTask(arr[0]);
+						},
+						function(arr){
+							var kind=activeItem.getAttribute("subname");
+							refreshTask(arr[1][kind]);
+					});
+				}else{ 
+					editTaskStorage(
+						replaceTask,
+						function(arr){
+							replaceTask(arr[0]);
+						},
+						function(arr){
+							var kind=activeItem.getAttribute("subname");
+							replaceTask(arr[1][kind]);
+					});
+				}
+				document.body.removeChild(editBox);
+				renderTask(title);
+				$(".date").innerHTML=date;
+				$(".edit-title").innerHTML=title;
+				$(".edit-content").innerHTML=content;
+		},
+		finishTask=function(e){
+			if (activeTask) {
+				var date=$(".date").innerHTML,
+					index=activeTask.getAttribute("index");
+				preventDefault(e);
+				addClass(activeTask,"finish");
+				editTaskStorage(
+					function(obj){
+						obj.taskData[date][index].finish=true;
+					},
+					function(arr){
+						arr[0].taskData[date][index].finish=true;
+					},
+					function(arr){
+						var kind=activeItem.getAttribute("subname");
+						arr[1][kind].taskData[date][index].finish=true;
+				});
+			}
+		},
+		filterTask=function(e,target){
+			preventDefault(e);
+			removeClass(filterStatus,"active");
+			filterStatus=target;
+			addClass(target,"active");
+			renderTask();
 		};
 	return {
 		init: function(){
@@ -327,7 +482,10 @@ var kind=function(){
 			$.delegateTag(".kind-list","a","click",renderTask);
 			$.delegateTag(".kind-list","i","click",collapse);
 			$.delegateTag(".task-list","a","click",showTask);
+			$.delegateTag(".task-title","a","click",filterTask);
 			$.click(".new-task",newTask);
+			$.click('.finish-btn',finishTask);
+			$.click('.edit-btn',editTask);
 		},
 	}
 }();
