@@ -1,12 +1,13 @@
-console.log("gtd");
-//管理分类的对象
+console.log("gtd4");
 
-var kind=function(){
+
+var task=function(){
 	var activeItem=$(".default a"),
-		newBox,
+		showBox=$(".show-box"),
 		editBox,
 		activeTask,
 		filterStatus=$(".all-task"),
+		operate,
 		getStorage=function(){
 			var kinds=getStore("kindIndex"),
 				arr=[],
@@ -93,7 +94,7 @@ var kind=function(){
 			$(".sum").innerHTML="("+sum+")";
 			kindList.innerHTML=kinds;
 			$(".kind").appendChild(kindList);
-			activeItem= $(".default a");
+			activeItem=$(".default a");
 		},
 		renderTask=function(active){
 			var taskList=$(".task-list"),
@@ -114,22 +115,22 @@ var kind=function(){
 								if (option==="unfinish") {
 									content+="";
 								}else{
+									console.log(content.indexOf('<dt>'+item+'</dt>'))
 									if (content.indexOf('<dt>'+item+'</dt>')===-1) {
 										content+='<dt>'+item+'</dt>';
 									}
 									content+='<dd><a class="finish" index="'+j+'">'+taskData[item][j].title+'</a></dd>';
 								}
-								
 							}else{
-								if (active&&active===taskData[item][j].title) {
-									content+='<dd><a index="'+j+'" class="active">'+taskData[item][j].title+'</a></dd>';
+								if (option==="finish") {
+									content+="";
 								}else{
-									if (option==="finish") {
-										content+="";
+									if (content.indexOf('<dt>'+item+'</dt>')===-1) {
+										content+='<dt>'+item+'</dt>';
+									}
+									if (active&&active===taskData[item][j].title) {
+										content+='<dd><a index="'+j+'" class="active">'+taskData[item][j].title+'</a></dd>';
 									}else{
-										if (content.indexOf('<dt>'+item+'</dt>')===-1) {
-											content+='<dt>'+item+'</dt>';
-										}
 										content+='<dd><a index="'+j+'">'+taskData[item][j].title+'</a></dd>';
 									}
 								}
@@ -240,13 +241,13 @@ var kind=function(){
 		},
 		addKind = function(e){
 			preventDefault(e);
-			if (!activeItem||hasClass(activeItem.parentNode,"list-item")) {
+			if (!activeItem||!activeItem.getAttribute("subname")) {
 				var kind=prompt("新分类：","");
-				if (kind) {
+				if (kind&&!haveKind(kind)) {
 					var li=document.createElement("li"),
-						a=document.createElement("a");
-						li.appendChild(a);
-					if (!activeItem) {  //如果是一级分类
+					    a=document.createElement("a");
+					li.appendChild(a);
+					if (!activeItem||!activeItem.name) {
 						addClass(li,"list-item");
 						$(".kind-list").appendChild(li);
 						a.innerHTML="<i></i>"+kind+"<span>(0)</span>";
@@ -258,7 +259,7 @@ var kind=function(){
 						editStore("kindIndex",function(arr){
 							arr.push(kind);
 						});
-					}else{ //如果是二级分类
+					}else{
 						if (!activeItem.parentNode.getElementsByClassName("sub-kind")[0]) {
 							var ul=document.createElement("ul");
 							ul.className="sub-kind";
@@ -272,18 +273,32 @@ var kind=function(){
 							}
 							arr[1][kind]={length:0};
 						});
-						a.innerHTML=kind+"<span>(0)</span>"
+						a.innerHTML=kind+"<span>(0)</span>";
 					}
 					removeClass(activeItem,"active");
 					activeItem=a;
 					addClass(activeItem,"active");
+					renderTask();
+				}else{
+					if (!kind) {
+						alert("分类名不能为空");
+					}else{
+						alert("该分类已存在");
+					}
 				}
+			}
+		},
+		haveKind=function(kind){
+			if (activeItem.name) {
+				return !!getStore(activeItem.name)[1][kind];
+			}else{
+				return !!getStore(kind);
 			}
 		},
 		collapse = function(e,target){
 			toggleClass(target.parentNode.parentNode,"hide");
 		},
-		createBox=function(option){
+		createBox=function(){
 			box=document.createElement("div");
 			var titleLb=document.createElement("label"),
 				title=document.createElement("input"),
@@ -302,40 +317,49 @@ var kind=function(){
 			contentLb.appendChild(document.createTextNode("任务描述："));
 			contentLb.appendChild(content);
 			cancel.appendChild(document.createTextNode("取消"));
-			if (option==="new") {
-				submit.appendChild(document.createTextNode("添加"));
-				$.add(submit,"click",addTask);
-				$.add(cancel,"click",function(){
-				document.body.removeChild(newBox);
-			});
-			}else{
-				submit.appendChild(document.createTextNode("修改"));
-				$.add(submit,"click",reviseTask);
-				$.add(cancel,"click",function(){
+			submit.appendChild(document.createTextNode("确定"));
+			$.add(submit,"click",agent);
+			$.add(cancel,"click",function(){
 				document.body.removeChild(editBox);
 			});
-			}
 			box.appendChild(titleLb);
 			box.appendChild(dateLb);
 			box.appendChild(contentLb);
 			box.appendChild(submit);
 			box.appendChild(cancel);
-			addClass(box,"task-box");
+			addClass(box,"edit-box");
 			return box;
+		},
+		agent=function(){
+			var date=editBox.getElementsByTagName("input")[1].value;
+			if (isDate(date)) {
+				if (operate==="new") {
+					addTask();
+				}else if (operate==="edit") {
+					reviseTask();
+				}
+			}else{
+				alert("请输入正确的日期格式");
+			}
 		},
 		newTask=function(e){
 			preventDefault(e);
 			if (activeItem) {
-				if (!newBox) {
-					newBox=createBox("new");
+				if (!editBox) {
+					editBox=createBox();
 				}
-				document.body.appendChild(newBox);
+				editBox.getElementsByTagName("input")[0].value="";
+				editBox.getElementsByTagName("input")[1].value="";
+				editBox.getElementsByTagName("textarea")[0].value="";
+				operate="new";
+				$(".edit").removeChild(showBox);
+				$(".edit").appendChild(editBox);
 			}
 		},
 		addTask=function(){
-			var title=newBox.getElementsByTagName("input")[0],
-				date=newBox.getElementsByTagName("input")[1],
-				content=newBox.getElementsByTagName("textarea")[0],
+			var title=editBox.getElementsByTagName("input")[0],
+				date=editBox.getElementsByTagName("input")[1],
+				content=editBox.getElementsByTagName("textarea")[0],
 			    store=function(task){
 					task.length+=1;
 					if (!task.taskData) {
@@ -373,13 +397,11 @@ var kind=function(){
 			}
 			renderTask(title.value);
 			addNum(activeItem.getElementsByTagName("span")[0],$(".sum"));
+			$(".edit").removeChild(editBox);
+			$(".edit").appendChild(showBox);
 			$(".edit-title").innerHTML=title.value;
 			$(".date").innerHTML=date.value;
 			$(".edit-content").innerHTML=content.value;
-			title.value="";
-			date.value="";
-			content.value="";
-			document.body.removeChild(newBox);
 		},
 		editTask=function(e){
 			if (activeTask) {
@@ -388,16 +410,18 @@ var kind=function(){
 					content=$(".edit-content").innerHTML;
 				preventDefault(e);
 				if (!editBox) {
-					editBox=createBox("edit");
+					editBox=createBox();
 				}
 				editBox.getElementsByTagName("input")[0].value=title;
 				editBox.getElementsByTagName("input")[1].value=date;
 				editBox.getElementsByTagName("textarea")[0].value=content;
-				document.body.appendChild(editBox);
+				operate="edit";
+				$(".edit").removeChild(showBox);
+				$(".edit").appendChild(editBox);
 			}
 		},
 		reviseTask=function(){
-			var dateBefore=$(".date").innerHTML,
+			var dateBefore=showBox.getElementsByClassName("date")[0].innerHTML,
 				title=editBox.getElementsByTagName("input")[0].value,
 				date=editBox.getElementsByTagName("input")[1].value,
 				content=editBox.getElementsByTagName("textarea")[0].value,
@@ -440,10 +464,11 @@ var kind=function(){
 							replaceTask(arr[1][kind]);
 					});
 				}
-				document.body.removeChild(editBox);
+				$(".edit").removeChild(editBox);
+				$(".edit").appendChild(showBox);
 				renderTask(title);
-				$(".date").innerHTML=date;
 				$(".edit-title").innerHTML=title;
+				$(".date").innerHTML=date;
 				$(".edit-content").innerHTML=content;
 		},
 		finishTask=function(e){
@@ -475,20 +500,20 @@ var kind=function(){
 	return {
 		init: function(){
 			getStorage();
-			$.click(".kind",removeActive);
-			$.click(".new-kind",addKind);
-			$.delegateTag(".kind-list","a","click",toggleActive);
-			$.delegateTag(".kind-list","a","click",deleteKind);
-			$.delegateTag(".kind-list","a","click",renderTask);
-			$.delegateTag(".kind-list","i","click",collapse);
-			$.delegateTag(".task-list","a","click",showTask);
-			$.delegateTag(".task-title","a","click",filterTask);
-			$.click(".new-task",newTask);
-			$.click('.finish-btn',finishTask);
-			$.click('.edit-btn',editTask);
+			$.click(".kind",removeActive); //点击任务列表的空白处
+			$.click(".new-kind",addKind);  //点击添加分类
+			$.delegateTag(".kind-list","a","click",toggleActive); //点击分类标题
+			$.delegateTag(".kind-list","a","click",renderTask);  //点击分类标题
+			$.delegateTag(".kind-list","a","click",deleteKind);  //点击删除分类按钮
+			$.delegateTag(".kind-list","i","click",collapse);  //点击左侧文件夹标志
+			$.delegateTag(".task-list","a","click",showTask);  //点击任务标题
+			$.delegateTag(".task-title","a","click",filterTask); //点击所有、已完成、未完成
+			$.click(".new-task",newTask); //点击新增任务
+			$.click('.finish-btn',finishTask); //点击完成任务
+			$.click('.edit-btn',editTask);  //点击修改任务
 		},
 	}
 }();
 
 
-kind.init();
+task.init();

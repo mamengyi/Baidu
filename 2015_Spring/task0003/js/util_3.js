@@ -515,3 +515,28 @@ function editStore(name,fn){
     fn(obj);
     setStore(name,obj);
 }
+//验证日期(格式为yyyy-mm-dd),不判断闰年。
+function isDate(date){
+    var arr;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        arr=date.split("-");
+        if (arr[1]>12||arr[1]<0) {
+            return false;
+        }else{
+            switch(arr[1]){
+                case "02":
+                    if (arr[2]>29) {return false}
+                case "04":
+                case "06":
+                case "09":
+                case "11":
+                    if (arr[2]>30) {return false}
+                default: 
+                    if (arr[2]>31) {return false}
+            }
+        }  
+        return true;
+    }else{
+        return false;
+    }
+}
