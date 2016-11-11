@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>My GTD</title>
+	<link rel="stylesheet" href="css/gtd3.css">
+</head>
+<body>
+	<header>GTD Tools</header>
+	<div class="nav-box">
+		<nav class="kind">
+			<h2>所有任务<span class="sum"></span></h2>
+			<p>分类列表</p>
+			<ul class="kind-list">
+				
+			</ul>
+		</nav>
+		<div class="new-kind"><a href="#">新增分类</a></div>
+	</div><!--kind结束-->
+	
+	<div class="nav-box">
+		<nav class="task">
+			<div class="task-title">
+				<a href="#" class="all-task active">所有</a>
+				<a href="#" class="unfinish-task">未完成</a>
+				<a href="#" class="finish-task">已完成</a>
+			</div>
+			<dl class="task-list"></dl>
+		</nav>
+		<div class="new-task"><a href="#">新增任务</a></div>
+	</div><!--task结束-->
+	
+	<section class="edit">
+		<div class="show-box">
+			<div><a href="#" class="edit-btn"></a><a href="#" class="finish-btn"></a><p class="show-title"></p></div>
+			<p class="show-date">任务日期：<time class="date"></time></p>
+			<p class="show-content"></p>
+		</div>
+		<div class="edit-box hide">
+			<label>任务标题(不能超过10个汉字)：<input type="text" class="edit-title"></label>
+			<label>任务日期(格式为yyyy-mm-dd)：<input type="text" class="edit-date"></label>
+			<label>任务描述：<textarea class="edit-content"></textarea></label>
+			<button class="submit">确定</button>
+			<button class="cancel">取消</button>
+		</div>
+	</section>
+<script type="text/javascript" src="js/util_3.1.js"></script>
+<script type="text/javascript" src="js/gtd5.js"></script>
+</body>
+</html>

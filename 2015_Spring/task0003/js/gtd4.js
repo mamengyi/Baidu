@@ -21,13 +21,13 @@ var task=function(){
 						for (var i = 0, len = kinds.length; i < len; i++) {
 							value=getStore(kinds[i]);
 							if (value[1]) {
-								var subArr=[kinds[i],value[0].length||0];
+								var subArr=[kinds[i],value[0]&&value[0].length||0];
 								for (var key in value[1]){
 									subArr.push(key,value[1][key].length);
 								}
 								arr.push(subArr);
 							}else{
-								arr.push(kinds[i],value[0].length);
+								arr.push(kinds[i],value[0]&&value[0].length||0);
 							}
 						}
 						renderKind(arr);
@@ -86,10 +86,12 @@ var task=function(){
 						subKind+='<li><a subname="'+arr[i][j]+'">'+arr[i][j]+'<span>('+arr[i][j+1]+')</span></a></li>';
 					}
 					kinds+='<li class="list-item"><a href="#" name="'+arr[i][0]+'"><i></i>'+arr[i][0]+'<span>('+num+')</span></a><ul class="sub-kind">'+subKind+'</ul></li>';
+					sum+=num;
 				}else{
-					kinds+='<li class="list-item"><a href="#" name="'+arr[i][0]+'"><i></i>'+arr[i][0]+'<span>('+arr[i][1]+')</span></a></li>';
+					kinds+='<li class="list-item"><a href="#" name="'+arr[i]+'"><i></i>'+arr[i]+'<span>('+arr[i+1]+')</span></a></li>';
+					sum+=arr[i+1];
+					i++;
 				}
-				sum+=num;
 			}
 			$(".sum").innerHTML="("+sum+")";
 			kindList.innerHTML=kinds;
@@ -242,43 +244,47 @@ var task=function(){
 		addKind = function(e){
 			preventDefault(e);
 			if (!activeItem||!activeItem.getAttribute("subname")) {
-				var kind=prompt("新分类：","");
+				var kind=trim(prompt("新分类：",""));
 				if (kind&&!haveKind(kind)) {
-					var li=document.createElement("li"),
-					    a=document.createElement("a");
-					li.appendChild(a);
-					if (!activeItem||!activeItem.name) {
-						addClass(li,"list-item");
-						$(".kind-list").appendChild(li);
-						a.innerHTML="<i></i>"+kind+"<span>(0)</span>";
-						a.name=kind;
-						setStore(kind,[{}]);
-						if (!getStore("kindIndex")) {
-							setStore("kindIndex",[]);
-						}
-						editStore("kindIndex",function(arr){
-							arr.push(kind);
-						});
-					}else{
-						if (!activeItem.parentNode.getElementsByClassName("sub-kind")[0]) {
-							var ul=document.createElement("ul");
-							ul.className="sub-kind";
-							activeItem.parentNode.appendChild(ul);
-						}
-						a.setAttribute("subname",kind);
-						activeItem.parentNode.getElementsByClassName("sub-kind")[0].appendChild(li);
-						editStore(activeItem.name,function(arr){
-							if (!arr[1]) {
-								arr[1]={};
+					if (kind.length<=7) {
+						var li=document.createElement("li"),
+						    a=document.createElement("a");
+						li.appendChild(a);
+						if (!activeItem||!activeItem.name) {
+							addClass(li,"list-item");
+							$(".kind-list").appendChild(li);
+							a.innerHTML="<i></i>"+kind+"<span>(0)</span>";
+							a.name=kind;
+							setStore(kind,[]);
+							if (!getStore("kindIndex")) {
+								setStore("kindIndex",[]);
 							}
-							arr[1][kind]={length:0};
-						});
-						a.innerHTML=kind+"<span>(0)</span>";
-					}
-					removeClass(activeItem,"active");
-					activeItem=a;
-					addClass(activeItem,"active");
-					renderTask();
+							editStore("kindIndex",function(arr){
+								arr.push(kind);
+							});
+						}else{
+							if (!activeItem.parentNode.getElementsByClassName("sub-kind")[0]) {
+								var ul=document.createElement("ul");
+								ul.className="sub-kind";
+								activeItem.parentNode.appendChild(ul);
+							}
+							a.setAttribute("subname",kind);
+							activeItem.parentNode.getElementsByClassName("sub-kind")[0].appendChild(li);
+							editStore(activeItem.name,function(arr){
+								if (!arr[1]) {
+									arr[1]={};
+								}
+								arr[1][kind]={length:0};
+							});
+							a.innerHTML=kind+"<span>(0)</span>";
+						}
+						removeClass(activeItem,"active");
+						activeItem=a;
+						addClass(activeItem,"active");
+						renderTask();
+					}else{
+						alert("分类名太长了，不要超过7个汉字哦")
+					}	
 				}else{
 					if (!kind) {
 						alert("分类名不能为空");
@@ -289,8 +295,12 @@ var task=function(){
 			}
 		},
 		haveKind=function(kind){
-			if (activeItem.name) {
-				return !!getStore(activeItem.name)[1][kind];
+			if (activeItem&&activeItem.name) {
+				if (getStore(activeItem.name)[1]) {
+					return !!getStore(activeItem.name)[1][kind];	
+				}else{
+					return false;
+				}
 			}else{
 				return !!getStore(kind);
 			}
@@ -320,7 +330,8 @@ var task=function(){
 			submit.appendChild(document.createTextNode("确定"));
 			$.add(submit,"click",agent);
 			$.add(cancel,"click",function(){
-				document.body.removeChild(editBox);
+				$(".edit").removeChild(editBox);
+				$(".edit").appendChild(showBox);
 			});
 			box.appendChild(titleLb);
 			box.appendChild(dateLb);
@@ -331,7 +342,6 @@ var task=function(){
 			return box;
 		},
 		agent=function(){
-			var date=editBox.getElementsByTagName("input")[1].value;
 			if (isDate(date)) {
 				if (operate==="new") {
 					addTask();

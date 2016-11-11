@@ -1,0 +1,276 @@
+/**公用样式**/
+ul,
+ol,
+dl,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+input,
+select,
+textarea,
+form {
+	margin: 0;
+	padding: 0;
+}
+img {
+	border: none; 
+	vertical-align: top;
+}
+ul,
+ol {
+	list-style: none;
+}
+input,
+select,
+textarea {
+	outline: none;
+	border: none;
+	background-color: transparent;
+}
+textarea {
+	resize: none;
+}
+em,
+i {
+	font-style: normal;
+}
+.clearfix:after {
+	content: "."; 
+	display: block; 
+	height: 0; 
+	visibility: hidden; 
+	clear: both; 
+}
+.clearfix { 
+	*zoom: 1; 
+}
+a {
+	text-decoration: none;
+	color: #000;
+	cursor: pointer;
+}
+body,
+h2,
+h1 {
+	font: 14px "Miscrosoft YaHei";
+}
+body {
+	margin: 12px;
+	background-color: #B0B0B0;
+}
+
+/*header*/
+header {
+	padding-left: 10px;
+	height: 60px;
+	line-height: 60px;
+	font-size: 20px;
+	border: 1px solid #CCC;
+	color: #999;
+	background-color: #DDD;
+}
+
+/*nav-box*/
+.nav-box {
+	float: left;
+	width: 230px;
+	border: 1px solid #CCC;
+}
+nav {
+	box-sizing: border-box;
+	height: 530px;
+}
+.new-kind,
+.new-task {
+	padding-left: 16px;
+	height: 40px;
+	line-height: 40px;
+	border-top: 1px solid #CCC;
+	background-color: #EEE;
+}
+.new-kind a,
+.new-task a {
+	padding: 3px 0 3px 28px;
+	background: url(image/add.png) no-repeat;
+}
+
+/*nav kind*/
+.kind {
+	padding: 20px 10px;
+	background-color: #F2F2F2;
+}
+.kind nav {
+	background-color: #F2F2F2;
+}
+.kind p {
+	margin: 20px 0;
+}
+.kind-list {
+	padding-left: 5px;
+}
+
+.kind-list .active {
+	background-color: #DEFF19;
+}
+
+
+.kind-list i {
+	margin-right: 10px;
+	width: 16px;
+	height: 16px;
+	display: inline-block;
+	background: url(image/file.png) no-repeat center bottom;
+}
+.kind-list .hide i {
+	background: url(image/file-hide.png) no-repeat center bottom;
+}
+.hide .sub-kind {
+	display: none;
+}
+
+
+.kind-list a {
+	display: inline-block;
+	padding: 4px 0;
+	width: 100%;
+}
+.kind-list a:hover:after {
+	content:url(image/delete.png);
+	margin-right: 10px;
+	margin-top: 3px;
+	float: right;
+	color: #FFF;
+}
+.sub-kind {
+	margin-left: 10px;
+}
+.sub-kind a {
+	text-indent: 20px;
+	background: url(image/text.png) no-repeat left center;
+}
+/*nav task*/
+.task {
+	background-color: #FFF;
+}
+.task-title {
+	padding-left: 10px;
+	height: 40px;
+	line-height: 40px;
+	border-bottom: 1px solid #CCC;
+	background-color: #EEE;
+}
+.task-title a {
+	padding: 5px 10px;
+	border: 1px solid transparent;
+}
+.task-title a:hover,
+.task-title .active {
+	border-color: #CCC;
+	background-color: #FFF;
+}
+.task-list {
+	width: 190px;
+	margin: 10px;
+}
+.task-list dt {
+	font-size: 16px;
+	margin-top: 10px;
+}
+
+.task-list dd a{
+	margin-top: 10px;
+	display: inline-block;
+	padding: 2px 0 2px 20px;
+	width: 100%;
+}
+.task-list .active {
+	background-color: #63BD84;
+}
+.task-list .finish {
+	background-image: url(image/finish.png);
+	background-repeat: no-repeat;
+	background-size: 18px 18px;
+}
+
+/*edit*/
+.edit {
+	overflow: hidden;
+	text-indent: 10px;
+	background-color: #FFF;
+}
+.show-title,
+.show-date {
+	height: 52px;
+	line-height: 52px;
+	border-bottom: 1px solid #CCC;
+	background-color: #FAFAEE;
+}
+.show-title {
+	background-color: #F2F2F2;
+	font-size: 18px;
+	font-weight: 700;
+}
+.edit .finish-btn,
+.edit .edit-btn {
+	float: right;
+	margin-right: 22px;
+	margin-top: 12px;
+	width: 25px;
+	height: 25px;
+}
+.edit .finish-btn {
+	background: url(image/finish.png) no-repeat;
+}
+.edit .edit-btn {
+	background: url(image/edit.png) no-repeat;
+}
+.show-content {
+	box-sizing: border-box;
+	height: 467px;
+	padding: 10px;
+}
+
+/*task-box*/
+.edit-box {
+	padding: 30px;
+	height: 530px;
+}
+.edit-box input,
+.edit-box textarea {
+	margin: 10px;
+	display: inline-block;
+	width: 100%;
+	border: 1px solid #000;
+}
+.edit-box input {
+	height: 30px;
+	line-height: 30px;
+}
+.edit-box textarea {
+	height: 150px;
+}
+.edit-box button {
+	padding: 5px 10px;
+	border: 1px solid #000; 
+	background-color: #FFF7D6;
+	margin: 10px;
+}
+.edit .hide {
+	display: none;
+}
+.edit-box .warn {
+	color: red;
+}
+/*shadeBox*/
+.shade{
+	width: 480px;
+	height: 800px;
+	position: fixed;
+	top: 0;
+	left: 0;
+}
