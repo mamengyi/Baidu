@@ -147,7 +147,7 @@ var task=function(){
 					var date=$(".task-list dt").innerHTML,
 						title=$(".task-list dd a").innerHTML,
 						index=$(".task-list dd a").getAttribute("index");
-					showTask(title,date,content);
+					showTask(title,date,taskData[date][index].content);
 				}else if (!content) {
 					showTask("","","");
 				}
