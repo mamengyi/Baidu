@@ -1,6 +1,4 @@
-console.log("gtd4");
-
-
+console.log("gtd6");
 var task=function(){
 	var activeItem,
 		showBox=$(".show-box"),
@@ -13,7 +11,23 @@ var task=function(){
 		getStorage=function(){
 			var kinds=getStore("kindIndex"),
 				arr=[],
-				value;
+				value,
+				taskData,
+				combine=function(obj1,obj2){
+					var key;
+					for(var i=0;i<obj2.orderData.length;i++){
+						key=obj2.orderData[i];
+						if (obj1[key]) {
+							obj1[key]=obj1[key].concat(obj2[key]);
+							obj2.orderData.splice(i,1);
+							i--;
+						}else{
+							obj1[key]=obj2[key];
+						}
+					}
+					obj1.orderData=obj1.orderData.concat(obj2.orderData);
+					return obj1;
+				};
 			switch(arguments.length){
 				case 0:
 					if (!getStore("默认分类")) {
@@ -43,12 +57,26 @@ var task=function(){
 				case 1:
 					if (getStore(arguments[0])) {
 						if (arguments[0]==="默认分类") {
-							return getStore(arguments[0]).taskData;
-						}else{
-							if (getStore(arguments[0])[0]) {
-								return getStore(arguments[0])[0].taskData;
+							return getStore("默认分类").taskData;
+						}else if (getStore(arguments[0])[0]){
+							return getStore(arguments[0])[0].taskData;	
+						}
+					}else if (arguments[0]==="all") {
+						taskData=getStore("默认分类").taskData||{orderData:[]};
+						arr=getStore("kindIndex");
+						for(var i=0,len=arr.length;i<len;i++){
+							if (getStore(arr[i])[0]&&getStore(arr[i])[0].taskData) {
+								taskData=combine(taskData,getStore(arr[i])[0].taskData);
+							}
+							for(var key in getStore(arr[i])[1]){
+								if (getStore(arr[i])[1][key].taskData) {
+									taskData=combine(taskData,getStore(arr[i])[1][key].taskData);
+									
+								}
 							}
 						}
+						taskData.orderData.sort();
+						return taskData;
 					}
 					break;
 				case 2:
@@ -106,14 +134,17 @@ var task=function(){
 		renderTask=function(active){
 			var taskList=$(".task-list"),
 				content="",
-				option;
+				option,
+				taskData;
+			if (activeItem) {
+				taskData=getTaskData();
+			}
 			if (hasClass(filterStatus,"finish-task")) {
 				option="finish";
 			}else if(hasClass(filterStatus,"unfinish-task")){
 				option="unfinish";
 			}
-			if (activeItem&&getTaskData()) {
-				var	taskData=getTaskData();
+			if (taskData) {
 				for (var i = 0; i < taskData["orderData"].length; i++) {
 					var item=taskData["orderData"][i];
 					for(var j=0;j<taskData[item].length;j++){
@@ -143,6 +174,12 @@ var task=function(){
 					}
 				}
 				taskList.innerHTML=content;
+				if(typeof active==="string"){
+					activeTask=$(".task-list .active");
+				}else{
+					activeTask=$(".task-list a");
+					activeTask && addClass(activeTask,"active");
+				}
 				if (content && typeof active!=="string") {
 					var date=$(".task-list dt").innerHTML,
 						title=$(".task-list dd a").innerHTML,
@@ -153,16 +190,18 @@ var task=function(){
 				}
 			}else{
 				taskList.innerHTML="";
+				activeTask=null;
 				showTask("","","");
 			}
-			if(typeof active==="string"){
-				activeTask=$(".task-list .active");
-			}else{
-				activeTask=$(".task-list a");
-				activeTask && addClass(activeTask,"active");
-			}
+			
 		},
 		showTask=function(title,date,content){
+			addClass($(".show-box div"),"hiding");
+			if (activeItem&&activeTask) {
+				if ((!activeItem.name||activeItem.name!=="all")&&!hasClass(activeTask,"finish")){
+					removeClass($(".show-box div"),"hiding");
+				}
+			}
 			$(".show-box .show-title").innerHTML=title;
 			$(".show-box .date").innerHTML=date;
 			$(".show-box .show-content").innerHTML=content;
@@ -271,8 +310,31 @@ var task=function(){
 			document.body.appendChild(shadeBox);
 			toggleClass("hide",showBox,editBox);
 		},
+		reduceNum=function(num){
+			if (num===1) {
+				for(var i=1,len=arguments.length;i<len;i++){
+					arguments[i].innerHTML="("+(arguments[i].innerHTML.substr(1,1)-1)+")";
+				}
+			}else{
+				for(var i=1,len=arguments.length;i<len;i++){
+					arguments[i].innerHTML="("+(arguments[i].innerHTML.substr(1,1)-arguments[0].getElementsByTagName("span")[0].innerHTML.substr(1,1))+")";
+				}
+			}
+		},
+		resize=function(){ //当浏览器窗口大小改变时。
+				var clientHeight=document.body.clientHeight;
+				if (clientHeight>480&&document.body.clientWidth>800) {
+					$(".kind").style.height=$(".task").style.height=clientHeight-62-41-12*2+"px";
+					$(".edit-box").style.height=clientHeight-62-12*2+"px";
+					$(".show-content").style.height=clientHeight-62-53*2-12*2+"px";
+					document.body.style.overflow="hidden";
+				}else{
+					document.body.style.overflow="auto";
+				}
+			},
 		init=function(){
 			getStorage();
+			resize();
 			$.click(".kind",function(){ //点击任务列表的空白处
 				removeClass(activeItem,"active");
 				activeItem=null;
@@ -281,7 +343,7 @@ var task=function(){
 			}); 
 			$.click(".new-kind",function(e){ //点击新增分类
 				preventDefault(e);
-				if (!activeItem||!activeItem.getAttribute("subname")) {
+				if (!activeItem||(activeItem.name&&activeItem.name!=="all")) {
 					var kind=trim(prompt("新分类：",""));
 					if (kind&&!haveKind(kind)) {
 						if (kind.length<=7) {
@@ -333,25 +395,19 @@ var task=function(){
 					}
 				}
 			}); 
-			$.delegateTag(".kind-list","a","click",function(e,target){  //点击分类标题
+			$.delegateTag(".kind","a","click",function(e,target){  //点击分类标题
 		        preventDefault(e);
 		        stopPropagation(e);
 		        if (activeItem) {removeClass(activeItem,"active");}
 				activeItem=target;
 				addClass(activeItem,"active");
 			}); 
-			$.delegateTag(".kind-list","a","click",renderTask);  //点击分类标题
+			$.delegateTag(".kind","a","click",renderTask);  //点击分类标题
 			$.delegateTag(".kind-list","a","click",function(e,target){ //点击删除分类按钮
 				var x=e.clientX;
-				if (x>217&&x<226) {
-					var reduceNum=function(){
-						var num=arguments[0].getElementsByTagName("span")[0].innerHTML.substr(1,1),
-							sum=arguments[1].innerHTML.substr(1,1);
-						arguments[1].innerHTML="("+(sum-num)+")";
-					}
-					if (hasClass(target.parentNode,"default")) {
-						alert("不能删除默认分类");
-					}else if (confirm("确认要删除吗？")) {
+				console.log(x);
+				if (x>207&&x<221) {
+					if (confirm("确认要删除吗？")) {
 						if (target.parentNode.nextSibling) {
 							activeItem=target.parentNode.nextSibling;
 							addClass(activeItem,"active");
@@ -392,10 +448,10 @@ var task=function(){
 					date=getdate(target.parentNode),
 					title=target.innerHTML,
 					content=taskData[date][target.getAttribute("index")].content;
-				showTask(title,date,content);
 				activeTask && removeClass(activeTask,"active");
 				activeTask=target;
-				addClass(activeTask,"active"); 
+				addClass(activeTask,"active");
+				showTask(title,date,content); 
 			});  
 			$.delegateTag(".task-title","a","click",function(e,target){ //点击所有、已完成、未完成
 				preventDefault(e);
@@ -406,14 +462,15 @@ var task=function(){
 			}); 
 			$.click(".new-task",function(e){  //点击新增任务按钮
 				preventDefault(e);
-				if (activeItem) {
+				if (activeItem&&(!activeItem.name||activeItem.name!=="all")) {
 					initEditBox("","","");
 					operate="new";
 					shade();
 				}
 			}); 
 			$.click('.finish-btn',function(e){ //点击完成任务按钮
-				if (activeTask) {
+				if (activeTask&&confirm("确定已经完成了吗？（确认完成后不可更改）")) {
+					addClass($(".show-box div"),"hiding");
 					var date=$(".date").innerHTML,
 						index=activeTask.getAttribute("index");
 					preventDefault(e);
@@ -421,14 +478,19 @@ var task=function(){
 					editTaskStorage(
 						function(obj){
 							obj.taskData[date][index].finish=true;
+							obj.length--;
 						},
 						function(arr){
 							arr[0].taskData[date][index].finish=true;
+							arr[0].length--;
 						},
 						function(arr){
 							var kind=activeItem.getAttribute("subname");
 							arr[1][kind].taskData[date][index].finish=true;
+							arr[1][kind].length--;
+							reduceNum(1,activeItem.parentNode.parentNode.previousSibling.getElementsByTagName("span")[0]);
 					});
+					reduceNum(1,activeItem.getElementsByTagName("span")[0],$(".sum"));
 				} 
 			}); 
 			$.click('.edit-btn',function(e){  //点击修改任务按钮
@@ -499,9 +561,10 @@ var task=function(){
 					}
 				}
 			});
+			$.add(window,"resize",resize);
 		};
 	return function(){
 		init();
 	}();	
 }();
-console.log(task);
+
