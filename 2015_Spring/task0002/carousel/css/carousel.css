@@ -1,0 +1,117 @@
+/*公用样式*/
+ul,li{
+	padding: 0;
+	margin: 0;
+}
+.clearfix:after{
+	content: ".";
+	height: 0;
+	display: block;
+	visibility: hidden;
+	clear: both;
+}
+.clearfix{
+	*zoom:1;
+}
+/*需要更改的值*/
+.horizontal img{  
+	width: 600px;
+	height: 400px;
+}
+.horizontal,
+.horizontal-box {
+	width: 600px;  /*单张图片宽度*/
+	height: 400px; /*单张图片高度*/
+}
+.horizontal ul{
+	width: 3600px; /*单张图片宽度x图片数量*/
+}
+.vertical img{  
+	width: 300px;
+	height: 400px;
+}
+.vertical,
+.vertical-box {
+	width: 300px;  /*单张图片宽度*/
+	height: 400px; /*单张图片高度*/
+}
+.vertical ul{
+	width: 1800px; /*单张图片宽度x图片数量*/
+}
+/*多轮播选项*/
+.carousel1,
+.carousel2 {
+	float: left;
+}
+/*调整按钮位置*/
+.carousel-btn{
+	position: absolute;
+	bottom: 20px;
+	right: 40px;
+}
+
+
+/*样式*/
+.carousel-box {
+	margin: 10px 30px;
+	position: relative;
+}
+.carousel,
+.carousel-box {
+	overflow: hidden;
+}
+.carousel li {
+	list-style-type: none;
+	float: left;
+}
+.carousel-btn a{
+	margin: 5px;
+	display: inline-block;
+	width: 10px;
+	height: 8px;
+	background-color: #FFF;
+}
+
+.carousel-btn .active{
+	background-color: #F40;
+}
+.arrow {
+	position: absolute;
+	top: 50%;
+	margin-top: -25px;
+	width: 50px;
+	height: 50px;
+	cursor: pointer;
+	background-color: rgba(0,0,0,.4);
+	font-size: 34px;
+	font-weight: 700;
+	color: #FFF;
+	text-align: center;
+	line-height: 50px;
+	-webkit-user-select:none;
+	   -moz-user-select:none;    
+	    -ms-user-select:none;    
+	        user-select:none;
+}
+.arrow:hover {
+	background-color: rgba(0,0,0,.7);
+}
+.hide .arrow {
+	display: none;
+}
+.prev {
+	left: 20px;
+}
+.next {
+	right: 20px;
+}
+.carousel-set {
+	margin: 0 auto;
+	width: 320px;
+}
+.carousel-set .t {
+	width: 30px;
+}
+.carousel-set label {
+	margin: 10px;
+}

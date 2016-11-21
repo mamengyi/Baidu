@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>轮播图</title>
+	<link rel="stylesheet" href="css/carousel.css">
+</head>
+<body>
+<div class="carousel1">
+	<div class="horizontal-box carousel-box">
+		<div class="horizontal carousel">
+			<ul class="clearfix" >
+				<li><img src="img/horizontal01.jpg" alt=""></li>
+				<li><img src="img/horizontal02.jpg" alt=""></li>
+				<li><img src="img/horizontal03.jpg" alt=""></li>
+				<li><img src="img/horizontal04.jpg" alt=""></li>
+				<li><img src="img/horizontal05.jpg" alt=""></li>
+				<li><img src="img/horizontal06.jpg" alt=""></li>
+			</ul>
+		</div>
+	</div>
+	<div class="carousel-set">
+		<p>播放顺序(默认顺时针)：</p>
+		<label>顺时针：<input type="radio" name="direct"></label>
+		<label>逆时针：<input type="radio" name="direct" class="backward"></label>
+		<p>是否循环?(默认为是)</p>
+		<label>是：<input type="radio" name="loop"></label>
+		<label>否：<input type="radio" name="loop" class="noloop"></label>
+		<p><label>输入间隔时间(默认为3s)：<input type="text" class="t"></label><button class="start">开始轮播</button></p>
+	</div>
+</div>
+
+<div class="carousel2">
+	<div class="vertical-box carousel-box">
+		<div class="vertical carousel">
+			<ul class="clearfix" >
+				<li><img src="img/vertical01.jpg" alt=""></li>
+				<li><img src="img/vertical02.jpg" alt=""></li>
+				<li><img src="img/vertical03.jpg" alt=""></li>
+				<li><img src="img/vertical04.jpg" alt=""></li>
+				<li><img src="img/vertical05.jpg" alt=""></li>
+				<li><img src="img/vertical06.jpg" alt=""></li>
+			</ul>
+		</div>
+	</div>
+	<div class="carousel-set">
+		<p>播放顺序(默认逆时针)：</p>
+		<label>顺时针：<input type="radio" name="direct2"></label>
+		<label>逆时针：<input type="radio" name="direct2" class="backward"></label>
+		<p>是否循环?(默认为否)</p>
+		<label>是：<input type="radio" name="loop2"></label>
+		<label>否：<input type="radio" name="loop2" class="noloop"></label>
+		<p><label>输入间隔时间(默认为2s)：<input type="text" class="t"></label><button class="start">开始轮播</button></p>
+	</div>
+</div>
+	<script type="text/javascript" src="js/util.js"></script>
+	<script type="text/javascript" src="js/carousel2.js"></script>
+</body>
+</html>
